@@ -36,13 +36,21 @@ class Tracer():
 
     def load(self):
 
-        with open(f"{self.name}_train.json", 'r', encoding='utf-8') as f:
-            self.train_data = json.load(f)
-            
-        with open(f"{self.name}_test.json", 'r', encoding='utf-8') as f:
-            self.test_data = json.load(f)
+        try:
 
-        epoch = self.train_data[-1]["epoch"]
+            with open(f"{self.name}_train.json", 'r', encoding='utf-8') as f:
+                self.train_data = json.load(f)
+                
+            with open(f"{self.name}_test.json", 'r', encoding='utf-8') as f:
+                self.test_data = json.load(f)
+
+            epoch = self.train_data[-1]["epoch"]
+
+        except:
+
+            self.train_data=[]
+            self.test_data=[]
+            epoch = 0
 
         return epoch
 

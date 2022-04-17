@@ -62,15 +62,15 @@ class niiDataset():
         NOISE=[]
         if training:      
             NOISE = [
-                    # RandRotated(keys=["image","label"],range_x=0.3,range_y=0.3,range_z=0.3,mode=['bilinear','nearest'],prob=0.2),
-                    # RandZoomd(keys=["image","label"],min_zoom=0.8, max_zoom=1.2,mode=["trilinear","nearest"],align_corners=[True,False],prob=0.15),
+                    RandRotated(keys=["image","label"],range_x=0.3,range_y=0.3,range_z=0.3,mode=['bilinear','nearest'],prob=0.2),
+                    RandZoomd(keys=["image","label"],min_zoom=0.8, max_zoom=1.2,mode=["trilinear","nearest"],align_corners=[True,False],prob=0.15),
                     RandGaussianSmoothd(keys="image",sigma_x=[0.5,1.15],sigma_y=[0.5,1.15],sigma_z=[0.5,1.15],prob=0.15),
                     RandScaleIntensityd(keys="image",factors=0.1,prob=0.5),
                     RandShiftIntensityd(keys="image",offsets=0.1,prob=0.5),
                     RandGaussianNoised(keys="image",std=0.01,prob=0.15),
-                    # RandFlipd(keys=["image","label"],spatial_axis=0,prob=0.5),
-                    # RandFlipd(keys=["image","label"],spatial_axis=1,prob=0.5),
-                    # RandFlipd(keys=["image","label"],spatial_axis=2,prob=0.5),
+                    RandFlipd(keys=["image","label"],spatial_axis=0,prob=0.5),
+                    RandFlipd(keys=["image","label"],spatial_axis=1,prob=0.5),
+                    RandFlipd(keys=["image","label"],spatial_axis=2,prob=0.5),
                     RandCropByPosNegLabeld(keys=["image", "label"],  label_key="label", spatial_size=args.roi, num_samples=args.samples, pos=1.0, neg=1.0, image_key="image", image_threshold=0.0)
                     ]
 
