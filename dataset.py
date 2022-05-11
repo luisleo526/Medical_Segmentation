@@ -21,8 +21,6 @@ class niiDataset():
         if args.reset_cache and self.local_rank == 0:
             self.reset_cache()
 
-        self.type = args.dataset
-
         self.make_data(args)
 
         self.train_loader = self.make_loader(args, self.TrData, True)
