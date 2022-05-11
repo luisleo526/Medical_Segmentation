@@ -18,6 +18,7 @@ def parse_args():
 
     parser.add_argument("--batch_size", type=int, default=1)
     parser.add_argument("--mini_batch", type=int, default=1)
+    parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--acm_grad", type=int, default=1)
     parser.add_argument("--num_epoch", type=int, default=1000)
 
