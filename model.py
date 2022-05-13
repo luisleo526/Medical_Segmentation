@@ -38,7 +38,8 @@ class UnetModel():
         self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=50, eta_min=args.lr*0.01)
 
         self.model = torch.nn.parallel.DistributedDataParallel(self.model, device_ids=[self.local_rank],
-                                                               output_device=self.local_rank)
+                                                               output_device=self.local_rank,
+                                                               find_unused_parameters=True)
 
         self.checkpoints = args.checkpoints
         self.name = args.name
