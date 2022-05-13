@@ -1,4 +1,4 @@
-from monai.networks.nets import UNet, DynUNet
+from monai.networks.nets import UNet, DynUNet, UNETR
 from monai.optimizers import Novograd
 from monai.networks import one_hot
 from monai.inferers import sliding_window_inference
@@ -23,16 +23,19 @@ class UnetModel():
             self.model = DynUNet(spatial_dims=3, in_channels=1, out_channels=3, kernel_size=kernels, strides=strides,
                                  upsample_kernel_size=strides[1:], norm_name="instance", deep_supervision=True,
                                  deep_supr_num=args.deep_supr_num)
-        else:
+        elif self.model_name == "unet":
             self.model = UNet(spatial_dims=3, in_channels=1, out_channels=3, channels=(16, 32, 64, 128, 256),
                               strides=(2, 2, 2, 2), num_res_units=2, kernel_size=3, up_kernel_size=3)
+        elif self.model_name == "unetr":
+            self.model = UNETR(in_channels=1, out_channels=3, img_size=args.roi, pos_embed='conv', norm_name='instance',
+                               feature_size=args.features_size)
 
         self.loss_fn = DiceCELoss(include_background=False, softmax=True, reduction='sum', to_onehot_y=True)
         self.optimizer = Novograd(self.model.parameters(), lr=args.lr)
 
         self.model.to(self.device)
         self.loss_fn.to(self.device)
-        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=20, eta_min=args.lr*0.01)
+        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=50, eta_min=args.lr*0.01)
 
         self.model = torch.nn.parallel.DistributedDataParallel(self.model, device_ids=[self.local_rank],
                                                                output_device=self.local_rank)
