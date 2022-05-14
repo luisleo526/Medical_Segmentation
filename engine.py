@@ -93,6 +93,8 @@ class DDP_Engine():
                 self.tracer.mode['train'].counter['dice_body'].add(data[1], data[0])
                 self.tracer.mode['train'].counter['dice_tumor'].add(data[2], data[0])
 
+        self.model.scheduler.step()
+
     def eval(self):
 
         for batch_id, batch in enumerate(self.datasets.test_loader, 1):

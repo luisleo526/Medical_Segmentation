@@ -83,7 +83,8 @@ class niiDataset():
 
         transform = BASIC + NOISE + ENSURE
 
-        if args.to_device: transform.append(ToDeviced(keys=["image", "label"], device=self.device))
+        if args.to_device:
+            transform.append(ToDeviced(keys=["image", "label"], device=self.device))
 
         return Compose(transform)
 

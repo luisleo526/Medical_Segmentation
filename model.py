@@ -1,5 +1,7 @@
 from monai.networks.nets import UNet, DynUNet, UNETR
 from monai.optimizers import Novograd
+from torch.optim import AdamW, Adam
+from torch.optim.lr_scheduler import CosineAnnealingLR, CyclicLR
 from monai.networks import one_hot
 from monai.inferers import sliding_window_inference
 from monai.losses import DiceCELoss
@@ -31,11 +33,12 @@ class UnetModel():
                                feature_size=args.features_size)
 
         self.loss_fn = DiceCELoss(include_background=False, softmax=True, reduction='sum', to_onehot_y=True)
-        self.optimizer = Novograd(self.model.parameters(), lr=args.lr)
+        self.optimizer = AdamW(self.model.parameters(), lr=args.lr)
+        self.scheduler = CyclicLR(self.optimizer, base_lr=args.lr / 100, max_lr=args.lr, cycle_momentum=False,
+                                  step_size_up=args.num_epoch/10)
 
         self.model.to(self.device)
         self.loss_fn.to(self.device)
-        self.scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(self.optimizer, T_max=50, eta_min=args.lr*0.01)
 
         self.model = torch.nn.parallel.DistributedDataParallel(self.model, device_ids=[self.local_rank],
                                                                output_device=self.local_rank,
@@ -100,7 +103,6 @@ class UnetModel():
         if step:
             self.scaler.step(self.optimizer)
             self.scaler.update()
-            self.scheduler.step()
             for param in self.model.parameters():
                 param.grad = None
 
