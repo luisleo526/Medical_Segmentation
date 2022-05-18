@@ -45,6 +45,8 @@ class UnetModel():
         self.model.to(self.device)
         self.loss_fn.to(self.device)
 
+        self.model = torch.nn.SyncBatchNorm.convert_sync_batchnorm(self.model)
+
         self.model = torch.nn.parallel.DistributedDataParallel(self.model, device_ids=[self.local_rank],
                                                                output_device=self.local_rank,
                                                                find_unused_parameters=False)
