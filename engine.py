@@ -22,6 +22,9 @@ class DDP_Engine():
         self.tracer = Tracer(self.args.name, ["loss", "dice_body", "dice_tumor"])
         self.start_epoch = self.tracer.load() if self.args.load else 0
 
+        if self.args.load:
+            self.model.scheduler.last_epoch = self.start_epoch
+
     def get_tqdm_postfix(self):
 
         info = {'Body': f"{self.tracer.mode['train'].counter['dice_body'].out() * 100:.2f}%",
