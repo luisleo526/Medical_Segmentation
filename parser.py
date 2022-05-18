@@ -13,7 +13,7 @@ def parse_args():
 
     parser.add_argument("--roi", type=int, nargs='+')
     parser.add_argument("--spacing", type=float, nargs='+')
-    parser.add_argument("--samples", type=int, default=32)
+    parser.add_argument("--samples", type=int, default=8)
     parser.add_argument("--act", type=str, default="softmax")
 
     parser.add_argument("--batch_size", type=int, default=1)

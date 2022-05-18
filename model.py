@@ -4,6 +4,7 @@ from torch.optim import AdamW, Adam
 from torch.optim.lr_scheduler import CosineAnnealingLR, CyclicLR
 from monai.networks import one_hot
 from monai.inferers import sliding_window_inference
+from monai.optimizers.lr_scheduler import WarmupCosineSchedule
 from monai.losses import DiceCELoss
 from torch.cuda.amp import autocast as autocast
 from torch.cuda.amp import GradScaler
@@ -34,8 +35,12 @@ class UnetModel():
 
         self.loss_fn = DiceCELoss(include_background=False, softmax=True, reduction='sum', to_onehot_y=True)
         self.optimizer = AdamW(self.model.parameters(), lr=args.lr)
-        self.scheduler = CyclicLR(self.optimizer, base_lr=args.lr / 100, max_lr=args.lr, cycle_momentum=False,
-                                  step_size_up=args.num_epoch/10)
+
+        if self.model_name == "unetr":
+            self.scheduler = WarmupCosineSchedule(self.optimizer, warmup_steps=50, t_total=args.num_epoch)
+        else:
+            self.scheduler = CyclicLR(self.optimizer, base_lr=args.lr / 100, max_lr=args.lr, cycle_momentum=False,
+                                      step_size_up=args.num_epoch/10)
 
         self.model.to(self.device)
         self.loss_fn.to(self.device)
