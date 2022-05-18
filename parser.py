@@ -18,14 +18,14 @@ def parse_args():
 
     parser.add_argument("--batch_size", type=int, default=1)
     parser.add_argument("--mini_batch", type=int, default=1)
-    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--lr", type=float, default=5e-4)
     parser.add_argument("--acm_grad", type=int, default=1)
     parser.add_argument("--num_epoch", type=int, default=1000)
 
     parser.add_argument("--cached", action='store_true')
     parser.add_argument("--to_device", action='store_true')
     parser.add_argument("--model", type=str, default="unet", help='options: "unet", "dyunet" "unetr')
-    parser.add_argument("--features_size", type=int, default=32)
+    parser.add_argument("--features_size", type=int, default=16)
     parser.add_argument("--deep_supr_num", type=int, default=3)
     parser.add_argument("--test_freq", type=int, default=25)
 

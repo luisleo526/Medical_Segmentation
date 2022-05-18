@@ -28,7 +28,8 @@ class Visualizer():
 
             for args in tracer.instances:
                 self.vis.line(X=train["epoch"].tolist(), Y=train[args].tolist(), win=args, name="train", update=None, 
-                    opts=dict(xlabel="Epoch", ylabel=args, showlegend=True) )
+                    opts=dict(xlabel="Epoch", ylabel=args, showlegend=True, title=args,
+                       layoutopts={'plotly': {'yaxis': {'type': 'log' if args == "loss" else '-'}}}))
 
                 if "epoch" in test.columns:
                     self.vis.line(X=test["epoch"].tolist(), Y=test[args].tolist(), win=args, name="test", update="append")
