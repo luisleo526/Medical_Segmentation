@@ -49,26 +49,6 @@ class DDP_Engine():
         torch.cuda.manual_seed_all(self.args.seed)
         set_determinism(self.args.seed)
 
-    def all_gather_data(self, in_data):
-
-        if int(os.environ["WORLD_SIZE"]) == 1:
-            return in_data
-
-        data = torch.tensor([x for x in in_data]).to(self.device)
-        gathers = [torch.zeros_like(data).to(self.device) for _ in range(int(os.environ["WORLD_SIZE"]))]
-
-        torch.distributed.all_gather(tensor_list=gathers, tensor=data)
-
-        sum_gathers = torch.zeros_like(data)
-        for sample in gathers:
-            sum_gathers += sample
-
-        sum_gathers = sum_gathers.tolist()
-
-        torch.distributed.barrier()
-
-        return sum_gathers
-
     def train(self):
 
         for batch_id, batch in enumerate(self.datasets.train_loader, 1):
@@ -85,13 +65,14 @@ class DDP_Engine():
                 else:
                     image, label = (batch['image'][s:e], batch['label'][s:e])
 
-                data = self.all_gather_data(self.model.train(image, label,
-                                                             batch_id % self.args.acm_grad == 0 or batch_id == len(
-                                                                 self.datasets.train_loader)))
+                data = self.model.train(image, label, batch_id % self.args.acm_grad == 0 or
+                                        batch_id == len(self.datasets.train_loader))
 
                 self.tracer.mode['train'].counter['loss'].add(data[-1], data[0])
                 self.tracer.mode['train'].counter['dice_body'].add(data[1], data[0])
                 self.tracer.mode['train'].counter['dice_tumor'].add(data[2], data[0])
+
+        self.tracer.mode['train'].all_gather()
 
         self.model.scheduler.step()
 
@@ -104,11 +85,13 @@ class DDP_Engine():
             else:
                 image, label = (batch['image'], batch['label'])
 
-            data = self.all_gather_data(self.model.eval(image, label))
+            data = self.model.eval(image, label)
 
             self.tracer.mode['test'].counter['loss'].add(data[-1], data[0])
             self.tracer.mode['test'].counter['dice_body'].add(data[1], data[0])
             self.tracer.mode['test'].counter['dice_tumor'].add(data[2], data[0])
+
+        self.tracer.mode['test'].all_gather()
 
     def visualize_and_save(self, epoch):
 
