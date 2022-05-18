@@ -40,14 +40,14 @@ class UnetModel():
             self.scheduler = WarmupCosineSchedule(self.optimizer, warmup_steps=50, t_total=args.num_epoch)
         else:
             self.scheduler = CyclicLR(self.optimizer, base_lr=args.lr / 100, max_lr=args.lr, cycle_momentum=False,
-                                      step_size_up=args.num_epoch/10)
+                                      step_size_up=args.num_epoch/20)
 
         self.model.to(self.device)
         self.loss_fn.to(self.device)
 
         self.model = torch.nn.parallel.DistributedDataParallel(self.model, device_ids=[self.local_rank],
                                                                output_device=self.local_rank,
-                                                               find_unused_parameters=True)
+                                                               find_unused_parameters=False)
 
         self.checkpoints = args.checkpoints
         self.name = args.name
