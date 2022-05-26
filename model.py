@@ -1,4 +1,4 @@
-from monai.networks.nets import UNet, DynUNet, UNETR
+from monai.networks.nets import UNet, DynUNet, UNETR, AttentionUnet
 from monai.optimizers import Novograd
 from torch.optim import AdamW, Adam
 from torch.optim.lr_scheduler import CosineAnnealingLR, CyclicLR
@@ -12,7 +12,7 @@ import torch
 import os
 
 
-class UnetModel():
+class UnetModel:
 
     def __init__(self, args):
 
@@ -32,6 +32,9 @@ class UnetModel():
         elif self.model_name == "unetr":
             self.model = UNETR(in_channels=1, out_channels=3, img_size=args.roi, pos_embed='conv', norm_name='instance',
                                feature_size=args.features_size)
+        elif self.model_name == "attunet":
+            self.model = AttentionUnet(spatial_dims=3, in_channels=1, out_channels=3, channels=(16, 32, 64, 128, 256),
+                                       strides=(2, 2, 2, 2), kernel_size=3, up_kernel_size=3)
 
         self.loss_fn = DiceCELoss(include_background=False, softmax=True, reduction='sum', to_onehot_y=True)
         self.optimizer = AdamW(self.model.parameters(), lr=args.lr)
@@ -49,7 +52,8 @@ class UnetModel():
 
         self.model = torch.nn.parallel.DistributedDataParallel(self.model, device_ids=[self.local_rank],
                                                                output_device=self.local_rank,
-                                                               find_unused_parameters=False)
+                                                               find_unused_parameters=True if self.model_name == "unetr"
+                                                               else False)
 
         self.checkpoints = args.checkpoints
         self.name = args.name
