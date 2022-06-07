@@ -35,3 +35,6 @@ The basic syntax to run the code
 ```
 torchrun --standalone --nnodes=1 --nproc_per_node=4 main.py --img_dir images --lab_dir labels --roi 96 96 96 --spacing 1 1 1
 ```
+
+## Download pretrained weights
+Use the script with `download_` prefix to download pretrained model weights.
